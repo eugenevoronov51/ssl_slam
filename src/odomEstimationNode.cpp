@@ -150,7 +150,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "main");
     ros::NodeHandle nh;
 
-    int scan_line = 64;
+   /*int scan_line = 64;
     double vertical_angle = 2.0;
     double scan_period= 0.1;
     double max_dis = 60.0;
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
     ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 100, velodyneSurfHandler);
 
     pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
-    std::thread odom_estimation_process{odom_estimation};
+    std::thread odom_estimation_process{odom_estimation};*/
 
     ros::spin();
 
