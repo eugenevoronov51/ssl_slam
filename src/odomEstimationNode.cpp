@@ -113,7 +113,7 @@ void odom_estimation(){
             }else{
                 std::chrono::time_point<std::chrono::system_clock> start, end;
                 start = std::chrono::system_clock::now();
-                odomEstimation.updatePointsToMap(pointcloud_edge_in, pointcloud_surf_in);
+                //odomEstimation.updatePointsToMap(pointcloud_edge_in, pointcloud_surf_in);
                 end = std::chrono::system_clock::now();
                 std::chrono::duration<float> elapsed_seconds = end - start;
                 total_frame++;
