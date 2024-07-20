@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 
     octoMapping.init(map_resolution);
     ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100, velodyneHandler);
-    ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/odom", 100, odomCallback);
+    ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 100, odomCallback);
 
     octo_map_pub = nh.advertise<octomap_msgs::Octomap>("/octo_map", 100);
     std::thread octo_mapping_process{octo_mapping};

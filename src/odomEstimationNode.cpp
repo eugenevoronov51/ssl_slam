@@ -107,7 +107,7 @@ void odom_estimation(){
             mutex_lock.unlock();
 
             if(is_odom_inited == false){
-                //odomEstimation.initMapWithPoints(pointcloud_edge_in, pointcloud_surf_in);
+                odomEstimation.initMapWithPoints(pointcloud_edge_in, pointcloud_surf_in);
                 is_odom_inited = true;
                 ROS_INFO("odom inited");
             }else{
@@ -141,13 +141,13 @@ void odom_estimation(){
 
 
             // Publish odometry
-            /*nav_msgs::Odometry laserOdometry;
+            nav_msgs::Odometry laserOdometry;
             laserOdometry.header.frame_id = "map";
             laserOdometry.child_frame_id = "base_link";
             laserOdometry.header.stamp = pointcloud_time;
             laserOdometry.pose.pose.orientation = t265_odom.pose.pose.orientation;
             laserOdometry.pose.pose.position = t265_odom.pose.pose.position;
-            pubLaserOdometry.publish(laserOdometry);*/
+            pubLaserOdometry.publish(laserOdometry);
 
         }
         //sleep 2 ms every time
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
     ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 100, velodyneSurfHandler);
     ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 100, odomHandler);
 
-    //pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
+    pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
     std::thread odom_estimation_process{odom_estimation};
 
     ros::spin();
