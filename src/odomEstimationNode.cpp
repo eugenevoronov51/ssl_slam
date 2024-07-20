@@ -107,7 +107,7 @@ void odom_estimation(){
             mutex_lock.unlock();
 
             if(is_odom_inited == false){
-                odomEstimation.initMapWithPoints(pointcloud_edge_in, pointcloud_surf_in);
+                //odomEstimation.initMapWithPoints(pointcloud_edge_in, pointcloud_surf_in);
                 is_odom_inited = true;
                 ROS_INFO("odom inited");
             }else{
