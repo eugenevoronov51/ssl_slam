@@ -58,21 +58,74 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
     ROS_WARN_ONCE("total points array %d", laserCloudScans.size());
 
     for(int i = 0; i < laserCloudScans.size(); i++){
-        
-        std::vector<Double2d> cloudCurvature; 
-        int total_points = laserCloudScans[i]->points.size()-10;
-        for(int j = 5; j < (int)laserCloudScans[i]->points.size() - 5; j++){
-            double diffX = laserCloudScans[i]->points[j - 5].x + laserCloudScans[i]->points[j - 4].x + laserCloudScans[i]->points[j - 3].x + laserCloudScans[i]->points[j - 2].x + laserCloudScans[i]->points[j - 1].x - 10 * laserCloudScans[i]->points[j].x + laserCloudScans[i]->points[j + 1].x + laserCloudScans[i]->points[j + 2].x + laserCloudScans[i]->points[j + 3].x + laserCloudScans[i]->points[j + 4].x + laserCloudScans[i]->points[j + 5].x;
-            double diffY = laserCloudScans[i]->points[j - 5].y + laserCloudScans[i]->points[j - 4].y + laserCloudScans[i]->points[j - 3].y + laserCloudScans[i]->points[j - 2].y + laserCloudScans[i]->points[j - 1].y - 10 * laserCloudScans[i]->points[j].y + laserCloudScans[i]->points[j + 1].y + laserCloudScans[i]->points[j + 2].y + laserCloudScans[i]->points[j + 3].y + laserCloudScans[i]->points[j + 4].y + laserCloudScans[i]->points[j + 5].y;
-            double diffZ = laserCloudScans[i]->points[j - 5].z + laserCloudScans[i]->points[j - 4].z + laserCloudScans[i]->points[j - 3].z + laserCloudScans[i]->points[j - 2].z + laserCloudScans[i]->points[j - 1].z - 10 * laserCloudScans[i]->points[j].z + laserCloudScans[i]->points[j + 1].z + laserCloudScans[i]->points[j + 2].z + laserCloudScans[i]->points[j + 3].z + laserCloudScans[i]->points[j + 4].z + laserCloudScans[i]->points[j + 5].z;
-            Double2d distance(j,diffX * diffX + diffY * diffY + diffZ * diffZ);
-            cloudCurvature.push_back(distance);
+        std::vector<Double2d> cloudDifferences;
+        int total_points = laserCloudScans[i]->points.size() - 10;
 
+        double max_distance = 0.005;
+        double min_distance = 0.001;
+
+        for (int j = 5; j < (int) laserCloudScans[i]->points.size() - 5; j++) {
+            double x_diff = laserCloudScans[i]->points[j - 5].x +
+                            laserCloudScans[i]->points[j - 4].x +
+                            laserCloudScans[i]->points[j - 3].x +
+                            laserCloudScans[i]->points[j - 2].x +
+                            laserCloudScans[i]->points[j - 1].x -
+                            10 * laserCloudScans[i]->points[j].x +
+                            laserCloudScans[i]->points[j + 1].x +
+                            laserCloudScans[i]->points[j + 2].x +
+                            laserCloudScans[i]->points[j + 3].x +
+                            laserCloudScans[i]->points[j + 4].x +
+                            laserCloudScans[i]->points[j + 5].x;
+
+            double y_diff = laserCloudScans[i]->points[j - 5].y +
+                            laserCloudScans[i]->points[j - 4].y +
+                            laserCloudScans[i]->points[j - 3].y +
+                            laserCloudScans[i]->points[j - 2].y +
+                            laserCloudScans[i]->points[j - 1].y -
+                            10 * laserCloudScans[i]->points[j].y +
+                            laserCloudScans[i]->points[j + 1].y +
+                            laserCloudScans[i]->points[j + 2].y +
+                            laserCloudScans[i]->points[j + 3].y +
+                            laserCloudScans[i]->points[j + 4].y +
+                            laserCloudScans[i]->points[j + 5].y;
+
+            double z_diff = laserCloudScans[i]->points[j - 5].z +
+                            laserCloudScans[i]->points[j - 4].z +
+                            laserCloudScans[i]->points[j - 3].z +
+                            laserCloudScans[i]->points[j - 2].z +
+                            laserCloudScans[i]->points[j - 1].z -
+                            10 * laserCloudScans[i]->points[j].z +
+                            laserCloudScans[i]->points[j + 1].z +
+                            laserCloudScans[i]->points[j + 2].z +
+                            laserCloudScans[i]->points[j + 3].z +
+                            laserCloudScans[i]->points[j + 4].z +
+                            laserCloudScans[i]->points[j + 5].z;
+
+            //std::cerr << "X diff: " << x_diff << " Y diff: " << y_diff << " Z diff: " << z_diff << std::endl;
+
+
+
+            Double2d distance(j, pow(x_diff, 2) + pow(y_diff, 2) + pow(z_diff, 2)); 
+
+            if (distance.value > min_distance and distance.value < max_distance) {
+                cloudDifferences.push_back(distance);
+                min_distance = pow(x_diff, 2) + pow(y_diff, 2) + pow(z_diff, 2);
+                // std::cerr << "Min distance: " << min_distance << std::endl;
+            }
         }
 
-        featureExtractionFromSector(laserCloudScans[i],cloudCurvature, pc_out_edge, pc_out_surf);
-            
-    
+        //std::chrono::time_point<std::chrono::system_clock> start, end;
+        //start = std::chrono::system_clock::now();
+        featureExtractionFromSector(laserClouds[i], cloudDifferences, pc_out_edge, pc_out_surf, min_distance);
+        //end = std::chrono::system_clock::now();
+        //std::chrono::duration<float> elapsed_seconds = end - start;
+        //total_frame++;
+
+        //float time_tmp = elapsed_seconds.count() * 1000;
+        //total_time += time_tmp;
+
+        //if(total_frame % 100 == 0)
+            //ROS_INFO("Average feature extraction from sector time %f ms \n \n", total_time/total_frame);
     }
 
 }

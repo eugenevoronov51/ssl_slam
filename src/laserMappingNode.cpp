@@ -185,7 +185,7 @@ int main(int argc, char **argv)
     lidar_param.setMinDistance(min_dis);
     
     laserMapping.init(map_resolution);
-    last_pose.translation().x() = 10;
+    last_pose.translation().x() = 1;
     ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10, velodyneHandler);
     ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/odom", 10, odomCallback);
     //ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 10, odom265Callback);
