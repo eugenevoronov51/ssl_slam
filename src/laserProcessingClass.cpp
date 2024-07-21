@@ -61,8 +61,8 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
         std::vector<Double2d> cloudDifferences;
         int total_points = laserCloudScans[i]->points.size() - 10;
 
-        double max_distance = 0.005;
-        double min_distance = 0.001;
+        double max_distance = 0.05;
+        double min_distance = 0.01;
 
         for (int j = 5; j < (int) laserCloudScans[i]->points.size() - 5; j++) {
             double x_diff = laserCloudScans[i]->points[j - 5].x +
