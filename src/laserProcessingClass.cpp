@@ -39,9 +39,9 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
         double angle = atan2(pc_in->points[i].x,pc_in->points[i].z) * 180 / M_PI;
         count++;
 
-        if(fabs(angle - last_angle)>0.05){
+        if(fabs(angle - last_angle)>0.1){
             
-            if(count>10){
+            if(count > 10){
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc_temp(new pcl::PointCloud<pcl::PointXYZRGB>());
                 for(int k=0;k<count;k++){
                     pc_temp->push_back(pc_in->points[i-count+k+1]);
@@ -131,7 +131,12 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
 }
 
 
-void LaserProcessingClass::featureExtractionFromSector(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& pc_in, std::vector<Double2d>& cloudCurvature, pcl::PointCloud<pcl::PointXYZRGB>::Ptr& pc_out_edge, pcl::PointCloud<pcl::PointXYZRGB>::Ptr& pc_out_surf){
+void LaserProcessingClass::featureExtractionFromSector(
+    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& pc_in, 
+    std::vector<Double2d>& cloudCurvature, 
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr& pc_out_edge, pcl::PointCloud<pcl::PointXYZRGB>::Ptr& pc_out_surf,
+    double min_distance
+){
 
     std::sort(cloudCurvature.begin(), cloudCurvature.end(), [](const Double2d & a, const Double2d & b)
     { 
@@ -164,7 +169,7 @@ void LaserProcessingClass::featureExtractionFromSector(const pcl::PointCloud<pcl
                 double diffX = pc_in->points[ind + k].x - pc_in->points[ind + k - 1].x;
                 double diffY = pc_in->points[ind + k].y - pc_in->points[ind + k - 1].y;
                 double diffZ = pc_in->points[ind + k].z - pc_in->points[ind + k - 1].z;
-                if (diffX * diffX + diffY * diffY + diffZ * diffZ > 0.05){
+                if (diffX * diffX + diffY * diffY + diffZ * diffZ > min_distance){
                     break;
                 }
                 picked_points.push_back(ind+k);
@@ -173,7 +178,7 @@ void LaserProcessingClass::featureExtractionFromSector(const pcl::PointCloud<pcl
                 double diffX = pc_in->points[ind + k].x - pc_in->points[ind + k + 1].x;
                 double diffY = pc_in->points[ind + k].y - pc_in->points[ind + k + 1].y;
                 double diffZ = pc_in->points[ind + k].z - pc_in->points[ind + k + 1].z;
-                if (diffX * diffX + diffY * diffY + diffZ * diffZ > 0.05){
+                if (diffX * diffX + diffY * diffY + diffZ * diffZ > min_distance){
                     break;
                 }
                 picked_points.push_back(ind+k);
