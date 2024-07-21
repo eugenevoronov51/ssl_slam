@@ -34,6 +34,9 @@ std::queue<nav_msgs::OdometryConstPtr> odometryBuf;
 std::queue<sensor_msgs::PointCloud2ConstPtr> pointCloudBuf;
 Eigen::Isometry3d last_pose = Eigen::Isometry3d::Identity();
 ros::Publisher map_pub;
+//ros::Publisher pubLaserOdometry;
+std::queue<nav_msgs::OdometryConstPtr> odometry265Buf;
+
 void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
 {
     mutex_lock.lock();
@@ -48,23 +51,30 @@ void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
     mutex_lock.unlock();
 }
 
+void odomt265Callback(const nav_msgs::Odometry::ConstPtr &msg)
+{
+    mutex_lock.lock();
+    odometry265Buf.push(msg);
+    mutex_lock.unlock();
+}
+
 int update_count = 0;
 int frame_id=0;
 void laser_mapping(){
     while(1){
-        if(!odometryBuf.empty() && !pointCloudBuf.empty()){
+        if(!odometry265Buf.empty() && !pointCloudBuf.empty()){
 
             //read data
             mutex_lock.lock();
-            if(!pointCloudBuf.empty() && pointCloudBuf.front()->header.stamp.toSec()<odometryBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period){
+            if(!pointCloudBuf.empty() && pointCloudBuf.front()->header.stamp.toSec()<odometry265Buf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period){
                 ROS_WARN("time stamp unaligned error and pointcloud discarded, pls check your data --> laser mapping node"); 
                 pointCloudBuf.pop();
                 mutex_lock.unlock();
                 continue;              
             }
 
-            if(!odometryBuf.empty() && odometryBuf.front()->header.stamp.toSec() < pointCloudBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period){
-                odometryBuf.pop();
+            if(!odometry265Buf.empty() && odometry265Buf.front()->header.stamp.toSec() < pointCloudBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period){
+                odometry265Buf.pop();
                 ROS_INFO("time stamp unaligned with path final, pls check your data --> laser mapping node");
                 mutex_lock.unlock();
                 continue;  
@@ -76,10 +86,10 @@ void laser_mapping(){
             ros::Time pointcloud_time = (pointCloudBuf.front())->header.stamp;
 
             Eigen::Isometry3d current_pose = Eigen::Isometry3d::Identity();
-            current_pose.rotate(Eigen::Quaterniond(odometryBuf.front()->pose.pose.orientation.w,odometryBuf.front()->pose.pose.orientation.x,odometryBuf.front()->pose.pose.orientation.y,odometryBuf.front()->pose.pose.orientation.z));  
-            current_pose.pretranslate(Eigen::Vector3d(odometryBuf.front()->pose.pose.position.x,odometryBuf.front()->pose.pose.position.y,odometryBuf.front()->pose.pose.position.z));
+            current_pose.rotate(Eigen::Quaterniond(odometry265Buf.front()->pose.pose.orientation.w,odometry265Buf.front()->pose.pose.orientation.x,odometry265Buf.front()->pose.pose.orientation.y,odometry265Buf.front()->pose.pose.orientation.z));  
+            current_pose.pretranslate(Eigen::Vector3d(odometry265Buf.front()->pose.pose.position.x,odometry265Buf.front()->pose.pose.position.y,odometry265Buf.front()->pose.pose.position.z));
             pointCloudBuf.pop();
-            odometryBuf.pop();
+            odometry265Buf.pop();
             mutex_lock.unlock();
             
             
@@ -91,7 +101,7 @@ void laser_mapping(){
             if(angular_change>90) angular_change = fabs(180 - angular_change);
             
             if(displacement>0.3 || angular_change>20){
-                //ROS_INFO("update map %f,%f",displacement,angular_change);
+                ROS_INFO("update map %f,%f",displacement,angular_change);
                 last_pose = current_pose;
                 laserMapping.updateCurrentPointsToMap(pointcloud_in,current_pose);
 
@@ -102,9 +112,6 @@ void laser_mapping(){
                 PointsMsg.header.frame_id = "map";
                 map_pub.publish(PointsMsg); 
             }
-            
-
-
         }
         //sleep 2 ms every time
         std::chrono::milliseconds dura(2);
@@ -140,7 +147,9 @@ int main(int argc, char **argv)
     last_pose.translation().x() = 10;
     ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100, velodyneHandler);
     ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/odom", 100, odomCallback);
+    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 100, odomHandler);
 
+    //pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
     map_pub = nh.advertise<sensor_msgs::PointCloud2>("/map", 100);
     std::thread laser_mapping_process{laser_mapping};
 

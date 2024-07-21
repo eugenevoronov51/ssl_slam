@@ -123,7 +123,7 @@ void odom_estimation(){
                     ROS_INFO("average odom estimation time %f ms \n \n", total_time/total_frame);
             }
 
-             // Use t265_odom for the transform and odometry messages
+            // Use t265_odom for the transform and odometry messages
             Eigen::Quaterniond q_current(t265_odom.pose.pose.orientation.w,
                                          t265_odom.pose.pose.orientation.x,
                                          t265_odom.pose.pose.orientation.y,
@@ -181,13 +181,13 @@ int main(int argc, char **argv)
     lidar_param.setMinDistance(min_dis);
 
     odomEstimation.init(lidar_param, map_resolution);
-    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100, velodyneHandler);
+    /*ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100, velodyneHandler);
     ros::Subscriber subEdgeLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_edge", 100, velodyneEdgeHandler);
     ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 100, velodyneSurfHandler);
     ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 100, odomHandler);
 
     pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
-    std::thread odom_estimation_process{odom_estimation};
+    std::thread odom_estimation_process{odom_estimation}; */
 
     ros::spin();
 
