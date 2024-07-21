@@ -80,6 +80,11 @@ void laser_mapping(){
 
             if (!pointCloudBuf.empty() && !odometry265Buf.empty()) {
 
+                // Print the sizes of the buffers
+                ROS_INFO("Size of pointCloudBuf: %ld", pointCloudBuf.size());
+                ROS_INFO("Size of odometry265Buf: %ld", odometry265Buf.size());
+
+
                 //ROS_WARN("read data"); 
                 //read data
                 mutex_lock.lock();
@@ -102,8 +107,7 @@ void laser_mapping(){
                     mutex_lock.unlock();
                     continue;  
                 }
-
-                ROS_WARN("Odometry published"); 
+                ROS_WARN("Odometry published start"); 
                 //if time aligned 
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_in(new pcl::PointCloud<pcl::PointXYZRGB>());
                 pcl::fromROSMsg(*pointCloudBuf.front(), *pointcloud_in);
@@ -136,6 +140,8 @@ void laser_mapping(){
                     PointsMsg.header.frame_id = "map";
                     map_pub.publish(PointsMsg); 
                 }
+
+                ROS_WARN("Odometry published end"); 
             }
         //}
 
