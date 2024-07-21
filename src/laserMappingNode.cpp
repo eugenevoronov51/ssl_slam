@@ -67,15 +67,19 @@ void laser_mapping(){
             //read data
             mutex_lock.lock();
             if(!pointCloudBuf.empty() && pointCloudBuf.front()->header.stamp.toSec()<odometry265Buf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period){
-                ROS_WARN("time stamp unaligned error and pointcloud discarded, pls check your data --> laser mapping node"); 
+                double time_diff = odometry265Buf.front()->header.stamp.toSec() - pointCloudBuf.front()->header.stamp.toSec();
+                ROS_WARN("time stamp unaligned error and pointcloud discarded, pls check your data --> laser mapping node 1"); 
+                ROS_WARN("Time difference: %f seconds", time_diff);  // Added print statement
                 pointCloudBuf.pop();
                 mutex_lock.unlock();
-                continue;              
+                continue;            
             }
 
             if(!odometry265Buf.empty() && odometry265Buf.front()->header.stamp.toSec() < pointCloudBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period){
+                double time_diff = pointCloudBuf.front()->header.stamp.toSec() - odometry265Buf.front()->header.stamp.toSec();
+                ROS_INFO("time stamp unaligned with path final, pls check your data --> laser mapping node 2");
+                ROS_INFO("Time difference: %f seconds", time_diff);  // Added print statement
                 odometry265Buf.pop();
-                ROS_INFO("time stamp unaligned with path final, pls check your data --> laser mapping node");
                 mutex_lock.unlock();
                 continue;  
             }
