@@ -38,6 +38,11 @@ ros::Publisher pubLaserOdometry;
 std::queue<nav_msgs::OdometryConstPtr> odometry265Buf;
 //nav_msgs::Odometry odometry265;
 
+int update_count = 0;
+int frame_id=0;
+double total_time =0;
+int odom_count =0;
+
 void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
 {
     mutex_lock.lock();
@@ -48,23 +53,22 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
 void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
     mutex_lock.lock();
-    if (pointCloudBuf.size() <= 50) {
-        pointCloudBuf.push(msg);
-    }
+    pointCloudBuf.push(msg);
     mutex_lock.unlock();
 }
 
 void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
+    odom_count++;
+    if(odom_count%5!=0)
+        continue;
+
     mutex_lock.lock();
-    if (odometry265Buf.size() <= 50) {
-        odometry265Buf.push(msg);
-    }
+    odometry265Buf.push(msg);
     mutex_lock.unlock();
 }
 
-int update_count = 0;
-int frame_id=0;
+
 void laser_mapping(){
     while(1){
         //ROS_WARN("laser_mapping"); 
@@ -110,6 +114,10 @@ void laser_mapping(){
                     mutex_lock.unlock();
                     continue;  
                 }
+                float time_temp = elapsed_seconds.count() * 1000;
+                total_time+=time_temp;
+                if(total_frame%100==0)
+                ROS_INFO("average laser processing time %f ms \n \n", total_time/total_frame);
                 ROS_WARN("Odometry published start"); 
                 //if time aligned 
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_in(new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -180,7 +188,7 @@ int main(int argc, char **argv)
     
     laserMapping.init(map_resolution);
     last_pose.translation().x() = 10;
-    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/l515/depth/color/points", 10, velodyneHandler);
+    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10, velodyneHandler);
     //ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/odom", 10, odomCallback);
     ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 10, odom265Callback);
 
