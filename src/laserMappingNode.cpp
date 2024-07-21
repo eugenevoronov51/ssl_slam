@@ -51,7 +51,7 @@ void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
     mutex_lock.unlock();
 }
 
-void odomt265Callback(const nav_msgs::Odometry::ConstPtr &msg)
+void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
     mutex_lock.lock();
     odometry265Buf.push(msg);
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
     last_pose.translation().x() = 10;
     ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100, velodyneHandler);
     ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/odom", 100, odomCallback);
-    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 100, odomHandler);
+    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 100, odom265Callback);
 
     //pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
     map_pub = nh.advertise<sensor_msgs::PointCloud2>("/map", 100);
