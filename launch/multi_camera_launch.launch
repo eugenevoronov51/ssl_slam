@@ -36,7 +36,7 @@
   <arg name="infra_fps"           default="30"/>
   <arg name="color_fps"           default="30"/>
   <arg name="gyro_fps"            default="200"/>
-  <arg name="accel_fps"           default="400"/>
+  <arg name="accel_fps"           default="100"/>
   <arg name="enable_gyro"         default="true"/>
   <arg name="enable_accel"        default="true"/>
 
@@ -76,6 +76,8 @@
       <arg name="calib_odom_file"       value="$(arg calib_odom_file)"/>
       <arg name="fisheye_fps"           value="$(arg fisheye_fps)"/>
       <arg name="enable_pose"           value="true"/>
+      <arg name="gyro_fps"                 value="200"/>
+      <arg name="accel_fps"                value="62"/>
     </include>
   </group>
 
