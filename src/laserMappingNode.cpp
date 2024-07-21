@@ -64,75 +64,79 @@ int update_count = 0;
 int frame_id=0;
 void laser_mapping(){
     while(1){
-        // Publish odometry
-        nav_msgs::Odometry laserOdometry;
-        laserOdometry.header.frame_id = "map";
-        laserOdometry.child_frame_id = "base_link";
-        laserOdometry.header.stamp = pointcloud_time;
-        laserOdometry.pose.pose.orientation = odometry265.pose.pose.orientation;
-        laserOdometry.pose.pose.position = odometry265.pose.pose.position;
-        pubLaserOdometry.publish(laserOdometry);
-        
-        if(!odometryBuf.empty() && !pointCloudBuf.empty()){
+        if(!pointCloudBuf.empty()){
+            // Publish odometry
+            ros::Time pointcloud_time = (pointCloudBuf.front())->header.stamp;
+            
+            nav_msgs::Odometry laserOdometry;
+            laserOdometry.header.frame_id = "map";
+            laserOdometry.child_frame_id = "base_link";
+            laserOdometry.header.stamp = pointcloud_time;
+            laserOdometry.pose.pose.orientation = odometry265.pose.pose.orientation;
+            laserOdometry.pose.pose.position = odometry265.pose.pose.position;
+            pubLaserOdometry.publish(laserOdometry);
 
-            //read data
-            mutex_lock.lock();
-            if(!pointCloudBuf.empty() && odometryBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period > pointCloudBuf.front()->header.stamp.toSec()){
-                double time_diff = (odometryBuf.front()->header.stamp.toSec()-(0.5*lidar_param.scan_period)) - pointCloudBuf.front()->header.stamp.toSec();
-                ROS_WARN("time stamp unaligned error and pointcloud discarded, pls check your data --> laser mapping node 1"); 
-                ROS_WARN("Time difference: %f seconds", time_diff);  // Added print statement
-                ROS_INFO("Scan period: %f seconds", 0.5*lidar_param.scan_period);  // Added print statement
+            if (!odometryBuf.empty()) {
+
+                //read data
+                mutex_lock.lock();
+                if(!pointCloudBuf.empty() && odometryBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period > pointCloudBuf.front()->header.stamp.toSec()){
+                    double time_diff = (odometryBuf.front()->header.stamp.toSec()-(0.5*lidar_param.scan_period)) - pointCloudBuf.front()->header.stamp.toSec();
+                    ROS_WARN("time stamp unaligned error and pointcloud discarded, pls check your data --> laser mapping node 1"); 
+                    ROS_WARN("Time difference: %f seconds", time_diff);  // Added print statement
+                    ROS_INFO("Scan period: %f seconds", 0.5*lidar_param.scan_period);  // Added print statement
+                    pointCloudBuf.pop();
+                    mutex_lock.unlock();
+                    continue;            
+                }
+
+                if(!odometryBuf.empty() && pointCloudBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period > odometryBuf.front()->header.stamp.toSec()){
+                    double time_diff = (pointCloudBuf.front()->header.stamp.toSec()-(0.5*lidar_param.scan_period)) - odometryBuf.front()->header.stamp.toSec();
+                    ROS_INFO("time stamp unaligned with path final, pls check your data --> laser mapping node 2");
+                    ROS_INFO("Time difference: %f seconds", time_diff); 
+                    ROS_INFO("Scan period: %f seconds", 0.5*lidar_param.scan_period);  // Added print statement
+                    odometryBuf.pop();
+                    mutex_lock.unlock();
+                    continue;  
+                }
+
+                //if time aligned 
+                pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_in(new pcl::PointCloud<pcl::PointXYZRGB>());
+                pcl::fromROSMsg(*pointCloudBuf.front(), *pointcloud_in);
+                ros::Time pointcloud_time = (pointCloudBuf.front())->header.stamp;
+
+                Eigen::Isometry3d current_pose = Eigen::Isometry3d::Identity();
+                current_pose.rotate(Eigen::Quaterniond(odometryBuf.front()->pose.pose.orientation.w,odometryBuf.front()->pose.pose.orientation.x,odometryBuf.front()->pose.pose.orientation.y,odometryBuf.front()->pose.pose.orientation.z));  
+                current_pose.pretranslate(Eigen::Vector3d(odometryBuf.front()->pose.pose.position.x,odometryBuf.front()->pose.pose.position.y,odometryBuf.front()->pose.pose.position.z));
                 pointCloudBuf.pop();
-                mutex_lock.unlock();
-                continue;            
-            }
-
-            if(!odometryBuf.empty() && pointCloudBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period > odometryBuf.front()->header.stamp.toSec()){
-                double time_diff = (pointCloudBuf.front()->header.stamp.toSec()-(0.5*lidar_param.scan_period)) - odometryBuf.front()->header.stamp.toSec();
-                ROS_INFO("time stamp unaligned with path final, pls check your data --> laser mapping node 2");
-                ROS_INFO("Time difference: %f seconds", time_diff); 
-                ROS_INFO("Scan period: %f seconds", 0.5*lidar_param.scan_period);  // Added print statement
                 odometryBuf.pop();
                 mutex_lock.unlock();
-                continue;  
+                
+                
+                update_count++;
+                Eigen::Isometry3d delta_transform = last_pose.inverse() * current_pose;
+                double displacement = delta_transform.translation().squaredNorm();
+                double angular_change = delta_transform.linear().eulerAngles(2,1,0)[0]* 180 / M_PI;
+
+                if(angular_change>90) angular_change = fabs(180 - angular_change);
+                
+                if(displacement>0.3 || angular_change>20){
+                    ROS_INFO("update map %f,%f",displacement,angular_change);
+                    last_pose = current_pose;
+                    laserMapping.updateCurrentPointsToMap(pointcloud_in,current_pose);
+
+                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc_map = laserMapping.getMap();
+                    sensor_msgs::PointCloud2 PointsMsg;
+                    pcl::toROSMsg(*pc_map, PointsMsg);
+                    PointsMsg.header.stamp = pointcloud_time;
+                    PointsMsg.header.frame_id = "map";
+                    map_pub.publish(PointsMsg); 
+                }
             }
-
-            //if time aligned 
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_in(new pcl::PointCloud<pcl::PointXYZRGB>());
-            pcl::fromROSMsg(*pointCloudBuf.front(), *pointcloud_in);
-            ros::Time pointcloud_time = (pointCloudBuf.front())->header.stamp;
-
-            Eigen::Isometry3d current_pose = Eigen::Isometry3d::Identity();
-            current_pose.rotate(Eigen::Quaterniond(odometryBuf.front()->pose.pose.orientation.w,odometryBuf.front()->pose.pose.orientation.x,odometryBuf.front()->pose.pose.orientation.y,odometryBuf.front()->pose.pose.orientation.z));  
-            current_pose.pretranslate(Eigen::Vector3d(odometryBuf.front()->pose.pose.position.x,odometryBuf.front()->pose.pose.position.y,odometryBuf.front()->pose.pose.position.z));
-            pointCloudBuf.pop();
-            odometryBuf.pop();
-            mutex_lock.unlock();
-            
-            
-            update_count++;
-            Eigen::Isometry3d delta_transform = last_pose.inverse() * current_pose;
-            double displacement = delta_transform.translation().squaredNorm();
-            double angular_change = delta_transform.linear().eulerAngles(2,1,0)[0]* 180 / M_PI;
-
-            if(angular_change>90) angular_change = fabs(180 - angular_change);
-            
-            if(displacement>0.3 || angular_change>20){
-                ROS_INFO("update map %f,%f",displacement,angular_change);
-                last_pose = current_pose;
-                laserMapping.updateCurrentPointsToMap(pointcloud_in,current_pose);
-
-                pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc_map = laserMapping.getMap();
-                sensor_msgs::PointCloud2 PointsMsg;
-                pcl::toROSMsg(*pc_map, PointsMsg);
-                PointsMsg.header.stamp = pointcloud_time;
-                PointsMsg.header.frame_id = "map";
-                map_pub.publish(PointsMsg); 
-            }
+            //sleep 2 ms every time
+            std::chrono::milliseconds dura(2);
+            std::this_thread::sleep_for(dura);
         }
-        //sleep 2 ms every time
-        std::chrono::milliseconds dura(2);
-        std::this_thread::sleep_for(dura);
     }
 }
 
