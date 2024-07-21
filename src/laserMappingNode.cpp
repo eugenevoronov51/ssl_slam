@@ -168,8 +168,8 @@ int main(int argc, char **argv)
     int scan_line = 64;
     double vertical_angle = 2.0;
     double scan_period= 0.1;
-    double max_dis = 60.0;
-    double min_dis = 2.0;
+    double max_dis = 1.5;
+    double min_dis = 0.2;
     double map_resolution = 0.4;
     nh.getParam("/scan_period", scan_period); 
     nh.getParam("/vertical_angle", vertical_angle); 
