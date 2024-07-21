@@ -45,6 +45,7 @@ int odom_count =0;
 
 void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
 {
+    ROS_WARN("Odom data received"); 
     mutex_lock.lock();
     odometryBuf.push(msg);
     mutex_lock.unlock();
@@ -154,7 +155,7 @@ void laser_mapping(){
         //}
 
         //sleep 2 ms every time
-        std::chrono::milliseconds dura(200);
+        std::chrono::milliseconds dura(50);
         std::this_thread::sleep_for(dura);
     }
 }
