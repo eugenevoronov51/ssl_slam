@@ -54,10 +54,10 @@ void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
 
 void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
-    mutex_lock.lock();
-    //odometry265 = *msg;
-    odometry265Buf.push(msg);
-    mutex_lock.unlock();
+    std::lock_guard<std::mutex> lock(mutex_lock);  // Use lock_guard for exception safety
+    if (odometry265Buf.size() <= 10) {
+        odometry265Buf.push(msg);
+    }
 }
 
 int update_count = 0;
