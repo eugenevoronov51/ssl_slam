@@ -67,7 +67,7 @@ int update_count = 0;
 int frame_id=0;
 void laser_mapping(){
     while(1){
-        ROS_WARN("laser_mapping"); 
+        //ROS_WARN("laser_mapping"); 
         //if(!pointCloudBuf.empty()){
             //ROS_WARN("Odometry published"); 
             // Publish odometry
