@@ -114,10 +114,12 @@ void laser_mapping(){
                     mutex_lock.unlock();
                     continue;  
                 }
+                
                 float time_temp = elapsed_seconds.count() * 1000;
                 total_time+=time_temp;
                 if(total_frame%100==0)
-                ROS_INFO("average laser processing time %f ms \n \n", total_time/total_frame);
+                    ROS_INFO("average laser processing time %f ms \n \n", total_time/total_frame);
+
                 ROS_WARN("Odometry published start"); 
                 //if time aligned 
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_in(new pcl::PointCloud<pcl::PointXYZRGB>());

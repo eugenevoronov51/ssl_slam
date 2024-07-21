@@ -94,7 +94,7 @@ void laser_processing(){
             laserCloudFilteredMsg.header.frame_id = "base_link";
             pubLaserCloudFiltered.publish(laserCloudFilteredMsg);
 
-            sensor_msgs::PointCloud2 edgePointsMsg;
+            /*sensor_msgs::PointCloud2 edgePointsMsg;
             pcl::toROSMsg(*pointcloud_edge, edgePointsMsg);
             edgePointsMsg.header.stamp = pointcloud_time;
             edgePointsMsg.header.frame_id = "base_link";
@@ -105,7 +105,7 @@ void laser_processing(){
             pcl::toROSMsg(*pointcloud_surf, surfPointsMsg);
             surfPointsMsg.header.stamp = pointcloud_time;
             surfPointsMsg.header.frame_id = "base_link";
-            pubSurfPoints.publish(surfPointsMsg);
+            pubSurfPoints.publish(surfPointsMsg);*/
 
         }
         //sleep 2 ms every time
@@ -143,9 +143,9 @@ int main(int argc, char **argv)
 
     pubLaserCloudFiltered = nh.advertise<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10);
 
-    pubEdgePoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_edge", 10);
+    //pubEdgePoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_edge", 10);
 
-    pubSurfPoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surf", 10); 
+    //pubSurfPoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surf", 10); 
 
     std::thread laser_processing_process{laser_processing};
 
