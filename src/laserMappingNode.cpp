@@ -139,7 +139,7 @@ void laser_mapping(){
         }
 
         //sleep 2 ms every time
-        std::chrono::milliseconds dura(100);
+        std::chrono::milliseconds dura(1000);
         std::this_thread::sleep_for(dura);
     }
 }
