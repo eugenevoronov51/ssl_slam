@@ -61,7 +61,7 @@ void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
     odom_count++;
     if(odom_count%5!=0)
-        continue;
+        return;
 
     mutex_lock.lock();
     odometry265Buf.push(msg);
