@@ -45,7 +45,7 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
     mutex_lock.unlock();
 }
 
-void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
+void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
     mutex_lock.lock();
     if (pointCloudBuf.size() <= 50) {
