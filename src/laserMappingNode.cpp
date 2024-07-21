@@ -159,7 +159,7 @@ int main(int argc, char **argv)
     nh.getParam("/scan_period", scan_period); 
     nh.getParam("/vertical_angle", vertical_angle); 
     nh.getParam("/max_dis", max_dis);
-    nh.getParam("/min_dis", min_dis);
+    nh.getParam("/min_dis", min_dis); //
     nh.getParam("/scan_line", scan_line);
     nh.getParam("/map_resolution", map_resolution);
 
