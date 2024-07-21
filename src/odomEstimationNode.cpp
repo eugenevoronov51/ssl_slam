@@ -151,7 +151,7 @@ void odom_estimation(){
 
         }
         //sleep 2 ms every time
-        std::chrono::milliseconds dura(100);
+        std::chrono::milliseconds dura(10);
         std::this_thread::sleep_for(dura);
     }
 }
@@ -181,12 +181,12 @@ int main(int argc, char **argv)
     lidar_param.setMinDistance(min_dis);
 
     odomEstimation.init(lidar_param, map_resolution);
-    /*ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100, velodyneHandler);
-    ros::Subscriber subEdgeLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_edge", 100, velodyneEdgeHandler);
-    ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 100, velodyneSurfHandler);
-    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 100, odomHandler);
+    /*ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10, velodyneHandler);
+    ros::Subscriber subEdgeLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_edge", 10, velodyneEdgeHandler);
+    ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 10, velodyneSurfHandler);
+    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 10, odomHandler);
 
-    pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
+    pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 10);
     std::thread odom_estimation_process{odom_estimation}; */
 
     ros::spin();

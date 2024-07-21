@@ -39,6 +39,7 @@ ros::Publisher pubLaserCloudFiltered;
 
 void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
 {
+    ROS_WARN("Point cloud data received"); 
     mutex_lock.lock();
     pointCloudBuf.push(laserCloudMsg);
     mutex_lock.unlock();
@@ -138,13 +139,13 @@ int main(int argc, char **argv)
 
     laserProcessing.init(lidar_param);
 
-    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/l515/depth/color/points", 100, velodyneHandler);
+    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/l515/depth/color/points", 10, velodyneHandler);
 
-    pubLaserCloudFiltered = nh.advertise<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100);
+    pubLaserCloudFiltered = nh.advertise<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10);
 
-    pubEdgePoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_edge", 100);
+    pubEdgePoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_edge", 10);
 
-    pubSurfPoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surf", 100); 
+    pubSurfPoints = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surf", 10); 
 
     std::thread laser_processing_process{laser_processing};
 

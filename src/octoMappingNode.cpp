@@ -110,7 +110,7 @@ void octo_mapping(){
 
         }
         //sleep 2 ms every time
-        std::chrono::milliseconds dura(100);
+        std::chrono::milliseconds dura(10);
         std::this_thread::sleep_for(dura);
     }
 }
@@ -139,10 +139,10 @@ int main(int argc, char **argv)
     lidar_param.setMinDistance(min_dis);
 
     octoMapping.init(map_resolution);
-    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100, velodyneHandler);
-    ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/odom", 100, odomCallback);
+    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10, velodyneHandler);
+    ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/odom", 10, odomCallback);
 
-    octo_map_pub = nh.advertise<octomap_msgs::Octomap>("/octo_map", 100);
+    octo_map_pub = nh.advertise<octomap_msgs::Octomap>("/octo_map", 10);
     std::thread octo_mapping_process{octo_mapping};
 
     ros::spin();

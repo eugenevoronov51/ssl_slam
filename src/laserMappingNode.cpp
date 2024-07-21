@@ -170,12 +170,12 @@ int main(int argc, char **argv)
     
     laserMapping.init(map_resolution);
     last_pose.translation().x() = 10;
-    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 100, velodyneHandler);
-    ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/odom", 100, odomCallback);
-    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 100, odom265Callback);
+    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/l515/depth/color/points", 10, velodyneHandler);
+    ros::Subscriber subOdometry = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 10, odomCallback);
+    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 10, odom265Callback);
 
-    pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
-    map_pub = nh.advertise<sensor_msgs::PointCloud2>("/map", 100);
+    pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 10);
+    map_pub = nh.advertise<sensor_msgs::PointCloud2>("/map", 10);
     std::thread laser_mapping_process{laser_mapping};
 
     ros::spin();

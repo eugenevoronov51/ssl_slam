@@ -41,7 +41,7 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
 
         if(fabs(angle - last_angle)>0.05){
             
-            if(count>100){
+            if(count>10){
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc_temp(new pcl::PointCloud<pcl::PointXYZRGB>());
                 for(int k=0;k<count;k++){
                     pc_temp->push_back(pc_in->points[i-count+k+1]);
