@@ -48,16 +48,19 @@ void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
 void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
 {
     mutex_lock.lock();
-    pointCloudBuf.push(laserCloudMsg);
+    if (pointCloudBuf.size() <= 50) {
+        pointCloudBuf.push(msg);
+    }
     mutex_lock.unlock();
 }
 
 void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
-    std::lock_guard<std::mutex> lock(mutex_lock);  // Use lock_guard for exception safety
-    if (odometry265Buf.size() <= 10) {
+    mutex_lock.lock();
+    if (odometry265Buf.size() <= 50) {
         odometry265Buf.push(msg);
     }
+    mutex_lock.unlock();
 }
 
 int update_count = 0;
@@ -146,7 +149,7 @@ void laser_mapping(){
         //}
 
         //sleep 2 ms every time
-        std::chrono::milliseconds dura(1000);
+        std::chrono::milliseconds dura(100);
         std::this_thread::sleep_for(dura);
     }
 }
