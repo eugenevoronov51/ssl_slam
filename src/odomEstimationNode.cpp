@@ -34,9 +34,9 @@ std::queue<sensor_msgs::PointCloud2ConstPtr> pointCloudBuf;
 lidar::Lidar lidar_param;
 
 ros::Publisher pubLaserOdometry;
-nav_msgs::Odometry t265_odom;
+nav_msgs::Odometry odometry265;
 
-void velodyneSurfHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
+/* void velodyneSurfHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
 {
     mutex_lock.lock();
     pointCloudSurfBuf.push(laserCloudMsg);
@@ -47,7 +47,8 @@ void velodyneEdgeHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
     mutex_lock.lock();
     pointCloudEdgeBuf.push(laserCloudMsg);
     mutex_lock.unlock();
-}
+} */
+
 void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
 {
     mutex_lock.lock();
@@ -55,11 +56,10 @@ void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
     mutex_lock.unlock();
 }
 
-
-void odomHandler(const nav_msgs::Odometry::ConstPtr &odomMsg)
+void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
     mutex_lock.lock();
-    t265_odom = *odomMsg;
+    odometry265 = *msg;
     mutex_lock.unlock();
 }
 
@@ -68,11 +68,11 @@ double total_time =0;
 int total_frame=0;
 void odom_estimation(){
     while(1){
-        if(!pointCloudEdgeBuf.empty() && !pointCloudSurfBuf.empty()&& !pointCloudBuf.empty()){
+        if(!pointCloudBuf.empty()){ // !pointCloudEdgeBuf.empty() && !pointCloudSurfBuf.empty()&& 
 
             //read data
             mutex_lock.lock();
-            if(!pointCloudBuf.empty() && (pointCloudBuf.front()->header.stamp.toSec()<pointCloudSurfBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period || pointCloudBuf.front()->header.stamp.toSec()<pointCloudEdgeBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period)){
+            /*if(!pointCloudBuf.empty() && (pointCloudBuf.front()->header.stamp.toSec()<pointCloudSurfBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period || pointCloudBuf.front()->header.stamp.toSec()<pointCloudEdgeBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period)){
                 ROS_WARN("time stamp unaligned error and odom discarded, pls check your data --> odom correction"); 
                 pointCloudBuf.pop();
                 mutex_lock.unlock();
@@ -91,22 +91,22 @@ void odom_estimation(){
                 ROS_INFO("time stamp unaligned with extra point cloud, pls check your data --> odom correction");
                 mutex_lock.unlock();
                 continue;  
-            }
+            }*/
             //if time aligned 
 
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_surf_in(new pcl::PointCloud<pcl::PointXYZRGB>());
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_edge_in(new pcl::PointCloud<pcl::PointXYZRGB>());
+            //pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_surf_in(new pcl::PointCloud<pcl::PointXYZRGB>());
+            //pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_edge_in(new pcl::PointCloud<pcl::PointXYZRGB>());
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_in(new pcl::PointCloud<pcl::PointXYZRGB>());
-            pcl::fromROSMsg(*pointCloudEdgeBuf.front(), *pointcloud_edge_in);
-            pcl::fromROSMsg(*pointCloudSurfBuf.front(), *pointcloud_surf_in);
+            //pcl::fromROSMsg(*pointCloudEdgeBuf.front(), *pointcloud_edge_in);
+            //pcl::fromROSMsg(*pointCloudSurfBuf.front(), *pointcloud_surf_in);
             pcl::fromROSMsg(*pointCloudBuf.front(), *pointcloud_in);
             ros::Time pointcloud_time = (pointCloudBuf.front())->header.stamp;
-            pointCloudEdgeBuf.pop();
-            pointCloudSurfBuf.pop();
+            //pointCloudEdgeBuf.pop();
+            //pointCloudSurfBuf.pop();
             pointCloudBuf.pop();
             mutex_lock.unlock();
 
-            if(is_odom_inited == false){
+            /*if(is_odom_inited == false){
                 //odomEstimation.initMapWithPoints(pointcloud_edge_in, pointcloud_surf_in);
                 is_odom_inited = true;
                 ROS_INFO("odom inited");
@@ -121,23 +121,23 @@ void odom_estimation(){
                 total_time+=time_temp;
                 if(total_frame%100==0)
                     ROS_INFO("average odom estimation time %f ms \n \n", total_time/total_frame);
-            }
+            }*/
 
-            // Use t265_odom for the transform and odometry messages
-            Eigen::Quaterniond q_current(t265_odom.pose.pose.orientation.w,
-                                         t265_odom.pose.pose.orientation.x,
-                                         t265_odom.pose.pose.orientation.y,
-                                         t265_odom.pose.pose.orientation.z);
-            Eigen::Vector3d t_current(t265_odom.pose.pose.position.x,
-                                      t265_odom.pose.pose.position.y,
-                                      t265_odom.pose.pose.position.z);
+            // Use odometry265 for the transform and odometry messages
+            /*Eigen::Quaterniond q_current(odometry265.pose.pose.orientation.w,
+                                         odometry265.pose.pose.orientation.x,
+                                         odometry265.pose.pose.orientation.y,
+                                         odometry265.pose.pose.orientation.z);
+            Eigen::Vector3d t_current(odometry265.pose.pose.position.x,
+                                      odometry265.pose.pose.position.y,
+                                      odometry265.pose.pose.position.z);
 
             static tf::TransformBroadcaster br;
             tf::Transform transform;
             transform.setOrigin(tf::Vector3(t_current.x(), t_current.y(), t_current.z()));
             tf::Quaternion q(q_current.x(), q_current.y(), q_current.z(), q_current.w());
             transform.setRotation(q);
-            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "base_link"));
+            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "base_link")); */
 
 
             // Publish odometry
@@ -145,8 +145,8 @@ void odom_estimation(){
             laserOdometry.header.frame_id = "map";
             laserOdometry.child_frame_id = "base_link";
             laserOdometry.header.stamp = pointcloud_time;
-            laserOdometry.pose.pose.orientation = t265_odom.pose.pose.orientation;
-            laserOdometry.pose.pose.position = t265_odom.pose.pose.position;
+            laserOdometry.pose.pose.orientation = odometry265.pose.pose.orientation;
+            laserOdometry.pose.pose.position = odometry265.pose.pose.position;
             pubLaserOdometry.publish(laserOdometry);
 
         }
@@ -181,13 +181,13 @@ int main(int argc, char **argv)
     lidar_param.setMinDistance(min_dis);
 
     odomEstimation.init(lidar_param, map_resolution);
-    /*ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10, velodyneHandler);
-    ros::Subscriber subEdgeLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_edge", 10, velodyneEdgeHandler);
-    ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 10, velodyneSurfHandler);
-    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 10, odomHandler);
+    ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10, velodyneHandler);
+    //ros::Subscriber subEdgeLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_edge", 10, velodyneEdgeHandler);
+    //ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 10, velodyneSurfHandler);
+    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 10, odom265Callback);
 
     pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 10);
-    std::thread odom_estimation_process{odom_estimation}; */
+    std::thread odom_estimation_process{odom_estimation};
 
     ros::spin();
 
