@@ -64,10 +64,12 @@ int update_count = 0;
 int frame_id=0;
 void laser_mapping(){
     while(1){
+        ROS_WARN("laser_mapping"); 
         if(!pointCloudBuf.empty()){
+            ROS_WARN("Odometry published"); 
             // Publish odometry
             ros::Time pointcloud_time = (pointCloudBuf.front())->header.stamp;
-            
+
             nav_msgs::Odometry laserOdometry;
             laserOdometry.header.frame_id = "map";
             laserOdometry.child_frame_id = "base_link";
@@ -78,6 +80,7 @@ void laser_mapping(){
 
             if (!odometryBuf.empty()) {
 
+                ROS_WARN("read data"); 
                 //read data
                 mutex_lock.lock();
                 if(!pointCloudBuf.empty() && odometryBuf.front()->header.stamp.toSec()-0.5*lidar_param.scan_period > pointCloudBuf.front()->header.stamp.toSec()){

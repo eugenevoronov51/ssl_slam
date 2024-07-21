@@ -50,7 +50,11 @@ int total_frame=0;
 int frame_count =0;
 void laser_processing(){
     while(1){
+
+        ROS_WARN("laser_processing"); 
         if(!pointCloudBuf.empty()){
+
+            ROS_WARN("!pointCloudBuf.empty() read data"); 
             //read data
             mutex_lock.lock();
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_in(new pcl::PointCloud<pcl::PointXYZRGB>());
