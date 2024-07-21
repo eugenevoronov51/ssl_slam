@@ -110,7 +110,7 @@ void octo_mapping(){
 
         }
         //sleep 2 ms every time
-        std::chrono::milliseconds dura(2);
+        std::chrono::milliseconds dura(100);
         std::this_thread::sleep_for(dura);
     }
 }
