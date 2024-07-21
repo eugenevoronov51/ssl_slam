@@ -116,7 +116,7 @@ void LaserProcessingClass::featureExtraction(const pcl::PointCloud<pcl::PointXYZ
 
         //std::chrono::time_point<std::chrono::system_clock> start, end;
         //start = std::chrono::system_clock::now();
-        featureExtractionFromSector(laserClouds[i], cloudDifferences, pc_out_edge, pc_out_surf, min_distance);
+        featureExtractionFromSector(laserCloudScans[i], cloudDifferences, pc_out_edge, pc_out_surf, min_distance);
         //end = std::chrono::system_clock::now();
         //std::chrono::duration<float> elapsed_seconds = end - start;
         //total_frame++;
