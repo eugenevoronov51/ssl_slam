@@ -59,9 +59,9 @@ void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 
 void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
-    odom_count++;
-    if(odom_count%5!=0)
-        return;
+    //odom_count++;
+    //if(odom_count%5!=0)
+    //    return;
 
     mutex_lock.lock();
     odometry265Buf.push(msg);
@@ -154,7 +154,7 @@ void laser_mapping(){
         //}
 
         //sleep 2 ms every time
-        std::chrono::milliseconds dura(100);
+        std::chrono::milliseconds dura(200);
         std::this_thread::sleep_for(dura);
     }
 }
