@@ -67,6 +67,7 @@
       <arg name="serial_no"             value="$(arg serial_no_camera1)"/>
       <arg name="tf_prefix"         		value="$(arg tf_prefix_camera1)"/>
       <arg name="initial_reset"         value="$(arg initial_reset)"/>
+      <arg name="enable_sync"              value="$(arg enable_sync)"/>
       <arg name="enable_fisheye1"       value="$(arg enable_fisheye)"/>
       <arg name="enable_fisheye2"       value="$(arg enable_fisheye)"/>
       <arg name="fisheye_width"         value="$(arg fisheye_width)"/>
