@@ -116,7 +116,7 @@ void laser_mapping(){
                     continue;  
                 }
 
-                ROS_WARN("Odometry published start"); 
+                //ROS_WARN("Odometry published start"); 
                 //if time aligned 
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud_in(new pcl::PointCloud<pcl::PointXYZRGB>());
                 pcl::fromROSMsg(*pointCloudBuf.front(), *pointcloud_in);
@@ -150,12 +150,11 @@ void laser_mapping(){
                     map_pub.publish(PointsMsg); 
                 }
 
-                ROS_WARN("Odometry published end"); 
             }
         //}
 
         //sleep 2 ms every time
-        std::chrono::milliseconds dura(50);
+        std::chrono::milliseconds dura(100);
         std::this_thread::sleep_for(dura);
     }
 }
