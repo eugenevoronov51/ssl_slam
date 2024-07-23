@@ -18,7 +18,8 @@
     <param name="map_resolution" type="double" value="0.05" />
     <param name="min_dis" type="double" value="0.2" />
 
-    <node pkg="imu_filter_madgwick" type="imu_filter_madgwick_node" name="imu_filter_madgwick" output="screen">
+    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen">
+    
         <param name="use_mag" value="fasle" />
         <param name="publish_tf" value="false" />
         <remap from="imu/data_raw" to="imu/data"/>
