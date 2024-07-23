@@ -19,7 +19,8 @@
     <param name="min_dis" type="double" value="0.2" />
 
     <node pkg="imu_filter_madgwick" type="imu_filter_madgwick_node" name="imu_filter_madgwick" output="screen">
-        <rosparam command="load" file="$(find your_package)/config/imu_filter.yaml"/>
+        <param name="use_mag" value="fasle" />
+        <param name="publish_tf" value="false" />
         <remap from="imu/data_raw" to="imu/data"/>
         <!--remap from="imu/mag" to="/your_mag_topic"/-->
     </node>
