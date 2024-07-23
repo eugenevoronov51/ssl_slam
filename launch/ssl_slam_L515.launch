@@ -2,9 +2,14 @@
 <launch>
     
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-        <arg name="color_width" value="1280" />
-        <arg name="color_height" value="720" />
+        <arg name="color_width" value="640" />
+        <arg name="color_height" value="480" />
         <arg name="filters" value="pointcloud" />
+        <arg name="enable_pointcloud" default="true"/>
+        <arg name="gyro_fps" default="200"/>
+        <arg name="accel_fps" default="100"/>
+        <arg name="enable_gyro" default="true"/>
+        <arg name="enable_accel" default="true"/>
     </include>
 
     <param name="scan_period" value="0.1" />
@@ -12,7 +17,12 @@
     <param name="max_dis" type="double" value="9.0" />
     <param name="map_resolution" type="double" value="0.05" />
     <param name="min_dis" type="double" value="0.2" />
-    
+
+    <node pkg="imu_filter_madgwick" type="imu_filter_madgwick_node" name="imu_filter_madgwick" output="screen">
+        <rosparam command="load" file="$(find your_package)/config/imu_filter.yaml"/>
+        <remap from="imu/data_raw" to="imu/data"/>
+        <!--remap from="imu/mag" to="/your_mag_topic"/-->
+    </node>
 
     <node pkg="ssl_slam" type="ssl_slam_laser_processing_node" name="ssl_slam_laser_processing_node" output="log"/>
     <node pkg="ssl_slam" type="ssl_slam_odom_estimation_node" name="ssl_slam_odom_estimation_node" output="log"/>
