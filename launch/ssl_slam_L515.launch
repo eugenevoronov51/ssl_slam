@@ -10,6 +10,8 @@
         <arg name="accel_fps" default="100"/>
         <arg name="enable_gyro" default="true"/>
         <arg name="enable_accel" default="true"/>
+        <arg name="publish_tf" default="true"/>
+        <arg name="unite_imu_method" default="linear_interpolation"/>
     </include>
 
     <param name="scan_period" value="0.1" />
@@ -20,8 +22,8 @@
 
     <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen">
     
-        <param name="use_mag" value="fasle" />
-        <param name="publish_tf" value="false" />
+        <param name="use_mag" value="false" />
+        <param name="publish_tf" value="true" />
         <remap from="imu/data_raw" to="imu/data"/>
         <!--remap from="imu/mag" to="/your_mag_topic"/-->
     </node>

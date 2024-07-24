@@ -64,7 +64,7 @@ void laser_processing(){
             pointCloudBuf.pop();
             mutex_lock.unlock();
             frame_count++;
-            if(frame_count%3!=0)
+            if(frame_count%9!=0)
                 continue;
 
 
