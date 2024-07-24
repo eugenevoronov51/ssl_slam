@@ -24,7 +24,7 @@
     
         <param name="use_mag" value="false" />
         <param name="publish_tf" value="true" />
-        <remap from="imu/data_raw" to="imu/data"/>
+        <remap from="imu/data_raw" to="camera/imu"/>
         <!--remap from="imu/mag" to="/your_mag_topic"/-->
     </node>
 
