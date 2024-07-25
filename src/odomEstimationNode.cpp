@@ -13,6 +13,7 @@
 //ros lib
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/Imu.h> 
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
@@ -56,12 +57,24 @@ void velodyneHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
     mutex_lock.unlock();
 }
 
-void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
+/*void odom265Callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
     mutex_lock.lock();
     odometry265 = *msg;
     mutex_lock.unlock();
+}*/
+
+void imuDataHandler(const sensor_msgs::Imu::ConstPtr &msg)
+{
+    std::lock_guard<std::mutex> lock(mutex_lock);
+    odometry265.header = msg->header;
+    odometry265.pose.pose.orientation = msg->orientation;
+    // Set position to zero since IMU doesn't provide position data
+    odometry265.pose.pose.position.x = 0.0;
+    odometry265.pose.pose.position.y = 0.0;
+    odometry265.pose.pose.position.z = 0.0;
 }
+
 
 bool is_odom_inited = false;
 double total_time =0;
@@ -148,6 +161,7 @@ void odom_estimation(){
             laserOdometry.child_frame_id = "base_link";
             laserOdometry.header.stamp = pointcloud_time;
 
+            // Assign quaternion directly
             laserOdometry.pose.pose.orientation.x = q_current.x();
             laserOdometry.pose.pose.orientation.y = q_current.y();
             laserOdometry.pose.pose.orientation.z = q_current.z();
@@ -195,7 +209,8 @@ int main(int argc, char **argv)
     ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10, velodyneHandler);
     //ros::Subscriber subEdgeLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_edge", 10, velodyneEdgeHandler);
     //ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 10, velodyneSurfHandler);
-    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/imu/data", 10, odom265Callback);
+    //ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/imu/data", 10, odom265Callback);
+    ros::Subscriber subImuData = nh.subscribe<sensor_msgs::Imu>("/imu/data", 10, imuDataHandler);
 
     pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 10);
     std::thread odom_estimation_process{odom_estimation};
