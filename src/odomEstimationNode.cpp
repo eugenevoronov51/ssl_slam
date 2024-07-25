@@ -124,7 +124,7 @@ void odom_estimation(){
             }*/
 
             // Use odometry265 for the transform and odometry messages
-            /*Eigen::Quaterniond q_current(odometry265.pose.pose.orientation.w,
+            Eigen::Quaterniond q_current(odometry265.pose.pose.orientation.w,
                                          odometry265.pose.pose.orientation.x,
                                          odometry265.pose.pose.orientation.y,
                                          odometry265.pose.pose.orientation.z);
@@ -137,7 +137,7 @@ void odom_estimation(){
             transform.setOrigin(tf::Vector3(t_current.x(), t_current.y(), t_current.z()));
             tf::Quaternion q(q_current.x(), q_current.y(), q_current.z(), q_current.w());
             transform.setRotation(q);
-            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "base_link")); */
+            br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "base_link")); 
 
 
             // Publish odometry
@@ -145,8 +145,8 @@ void odom_estimation(){
             laserOdometry.header.frame_id = "map";
             laserOdometry.child_frame_id = "base_link";
             laserOdometry.header.stamp = pointcloud_time;
-            laserOdometry.pose.pose.orientation = odometry265.pose.pose.orientation;
-            laserOdometry.pose.pose.position = odometry265.pose.pose.position;
+            laserOdometry.pose.pose.orientation = q_current;
+            laserOdometry.pose.pose.position = t_current;
             pubLaserOdometry.publish(laserOdometry);
 
         }
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
     ros::Subscriber subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_filtered", 10, velodyneHandler);
     //ros::Subscriber subEdgeLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_edge", 10, velodyneEdgeHandler);
     //ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 10, velodyneSurfHandler);
-    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/t265/odom/sample", 10, odom265Callback);
+    ros::Subscriber subT265Odom = nh.subscribe<nav_msgs::Odometry>("/imu/data", 10, odom265Callback);
 
     pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 10);
     std::thread odom_estimation_process{odom_estimation};
