@@ -128,7 +128,7 @@ void odom_estimation(){
                                          odometry265.pose.pose.orientation.x,
                                          odometry265.pose.pose.orientation.y,
                                          odometry265.pose.pose.orientation.z);
-                                         
+
             Eigen::Vector3d t_current(odometry265.pose.pose.position.x,
                                       odometry265.pose.pose.position.y,
                                       odometry265.pose.pose.position.z);
@@ -150,7 +150,7 @@ void odom_estimation(){
 
             // Convert Eigen::Quaterniond to geometry_msgs::Quaternion
             geometry_msgs::Quaternion odom_quat;
-            tf::quaternionEigenToMsg(q_current, odom_quat);
+            tf::quaternionTFToMsg(q_current, odom_quat);
             laserOdometry.pose.pose.orientation = odom_quat;
 
             // Assign position directly
