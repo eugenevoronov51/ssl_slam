@@ -143,18 +143,24 @@ void odom_estimation(){
             transform.setRotation(q);
             br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "base_link")); 
 
-            geometry_msgs::Quaternion odom_quat;
-            tf::quaternionEigenToMsg(q_current, odom_quat);
+            
 
             // Publish odometry
             nav_msgs::Odometry laserOdometry;
             laserOdometry.header.frame_id = "map";
             laserOdometry.child_frame_id = "base_link";
             laserOdometry.header.stamp = pointcloud_time;
+
+            // Convert Eigen::Quaterniond to geometry_msgs::Quaternion
+            geometry_msgs::Quaternion odom_quat;
+            tf::quaternionEigenToMsg(q_current, odom_quat);
             laserOdometry.pose.pose.orientation = odom_quat;
+
+            // Assign position directly
             laserOdometry.pose.pose.position.x = t_current.x();
             laserOdometry.pose.pose.position.y = t_current.y();
             laserOdometry.pose.pose.position.z = t_current.z();
+
             pubLaserOdometry.publish(laserOdometry);
 
         }
