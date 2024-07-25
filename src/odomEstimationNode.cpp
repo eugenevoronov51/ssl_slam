@@ -149,9 +149,9 @@ void odom_estimation(){
             laserOdometry.header.stamp = pointcloud_time;
 
             // Convert Eigen::Quaterniond to geometry_msgs::Quaternion
-            geometry_msgs::Quaternion odom_quat;
-            tf::quaternionTFToMsg(q_current, odom_quat);
-            laserOdometry.pose.pose.orientation = odom_quat;
+            //geometry_msgs::Quaternion odom_quat;
+            //tf::quaternionTFToMsg(q_current, odom_quat);
+            laserOdometry.pose.pose.orientation = q;
 
             // Assign position directly
             laserOdometry.pose.pose.position.x = t_current.x();
