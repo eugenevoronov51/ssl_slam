@@ -128,10 +128,7 @@ void odom_estimation(){
                                          odometry265.pose.pose.orientation.x,
                                          odometry265.pose.pose.orientation.y,
                                          odometry265.pose.pose.orientation.z);
-            Eigen::Vector3d t_current(odometry265.pose.pose.position.x,
-                                      odometry265.pose.pose.position.y,
-                                      odometry265.pose.pose.position.z);
-            
+                                         
             Eigen::Vector3d t_current(odometry265.pose.pose.position.x,
                                       odometry265.pose.pose.position.y,
                                       odometry265.pose.pose.position.z);
